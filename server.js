@@ -20,6 +20,7 @@ if(ADMIN_EMAIL&&ADMIN_PASSWORD&&ADMIN_PASSWORD.length>=12&&!db.prepare("SELECT 1
  db.prepare('INSERT INTO users(email,hash,role) VALUES(?,?,?)').run(ADMIN_EMAIL.toLowerCase(),bcrypt.hashSync(ADMIN_PASSWORD,12),'admin');
 const log=(ev,x={})=>console.log(JSON.stringify({t:new Date().toISOString(),ev,...x})); // A09
 const app=express();app.disable('x-powered-by');app.set('trust proxy',1);
+app.use('/admin', express.static('admin'));
 app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'","data:"],objectSrc:["'none'"],frameAncestors:["'none'"],baseUri:["'self'"],formAction:["'self'"]}},hsts:NODE_ENV==='production'?{maxAge:31536000,includeSubDomains:true}:false}));
 app.use(rateLimit({windowMs:60000,limit:200,standardHeaders:true,legacyHeaders:false}));
 // Payment webhook FIRST: raw body + HMAC signature (A08 integrity), no cookie/CSRF
