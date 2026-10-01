@@ -2,6 +2,7 @@
 # Smoke + security tests. Usage: npm test
 export JWT_SECRET=$(openssl rand -hex 32) ENC_KEY=$(openssl rand -hex 32) WEBHOOK_SECRET=$(openssl rand -hex 32) ADMIN_EMAIL=a@b.co ADMIN_PASSWORD=very-long-pass-123 DB_FILE=/tmp/t.db PORT=3111
 rm -f $DB_FILE*; node server.js >/tmp/srv.log 2>&1 & PID=$!; sleep 1.5; U=http://localhost:3111; J=/tmp/cj; rm -f $J
+for f in public/*.js admin/*.js; do node --check $f || { echo "FAIL syntax $f"; kill $PID; exit 1; }; done; echo 'PASS all JS syntax'
 H=(-H 'X-Requested-With: fetch' -H 'Content-Type: application/json'); F=0
 chk(){ if [ "$2" == "$3" ]; then echo "PASS $1"; else echo "FAIL $1 (got $2 want $3)"; F=1; fi; }
 c(){ curl -s -o /tmp/o -w '%{http_code}' "$@"; }
