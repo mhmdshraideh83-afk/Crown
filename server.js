@@ -20,7 +20,6 @@ if(ADMIN_EMAIL&&ADMIN_PASSWORD&&ADMIN_PASSWORD.length>=12&&!db.prepare("SELECT 1
  db.prepare('INSERT INTO users(email,hash,role) VALUES(?,?,?)').run(ADMIN_EMAIL.toLowerCase(),bcrypt.hashSync(ADMIN_PASSWORD,12),'admin');
 const log=(ev,x={})=>console.log(JSON.stringify({t:new Date().toISOString(),ev,...x})); // A09
 const app=express();app.disable('x-powered-by');app.set('trust proxy',1);
-app.use('/admin', express.static('admin', { index: 'login.html' }));
 app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'","data:"],objectSrc:["'none'"],frameAncestors:["'none'"],baseUri:["'self'"],formAction:["'self'"]}},hsts:NODE_ENV==='production'?{maxAge:31536000,includeSubDomains:true}:false}));
 app.use(rateLimit({windowMs:60000,limit:200,standardHeaders:true,legacyHeaders:false}));
 // Payment webhook FIRST: raw body + HMAC signature (A08 integrity), no cookie/CSRF
@@ -80,7 +79,7 @@ app.post('/api/admin/logout',(q,r)=>{r.clearCookie('at',{...ck,maxAge:undefined}
 const parseP=b=>{
  const sizes=(Array.isArray(b.sizes)?b.sizes:[]).slice(0,20).map(s=>S(s,10));
  const colors=(Array.isArray(b.colors)?b.colors:[]).slice(0,30).map(c=>{if(!/^#[0-9a-fA-F]{6}$/.test(c?.hex))throw new E('color');return{name:S(c.name,30),hex:c.hex};});
- const images=(Array.isArray(b.images)?b.images:[]).slice(0,50).map(i=>{if(!/^\/uploads\/[a-f0-9]{32}\.(jpg|png|webp)$/.test(i))throw new E('image');return i;});
+ const images=(Array.isArray(b.images)?b.images:[]).slice(0,50).map(i=>{if(!/^\/uploads\/[a-f0-9]{32}\.(jpg|png|gif|webp|avif)$/.test(i))throw new E('image');return i;});
  let ali='';if(b.ali_url){try{const u=new URL(b.ali_url);if(u.protocol!=='https:'||!/(^|\.)aliexpress\.(com|us)$/.test(u.hostname))throw 0;ali=u.href;}catch{throw new E('ali_url');}}
  return[S(b.title_en,200),S(b.title_ar,200),String(b.desc_en||'').slice(0,5000),String(b.desc_ar||'').slice(0,5000),JSON.stringify((Array.isArray(b.tags)?b.tags:[]).slice(0,20).map(t=>S(t,30))),money(b.price),b.compare?money(b.compare):0,money(b.cost),JSON.stringify(images),JSON.stringify(sizes),JSON.stringify(colors),ali,String(b.supplier_id||'').slice(0,64),b.active===false?0:1];};
 const COLS='title_en,title_ar,desc_en,desc_ar,tags,price,compare,cost,images,sizes,colors,ali_url,supplier_id,active';
@@ -88,7 +87,7 @@ app.get('/api/admin/products',admin,(q,r)=>r.json(db.prepare('SELECT * FROM prod
 app.post('/api/admin/products',admin,(q,r)=>{const v=parseP(q.body||{});const id=db.prepare(`INSERT INTO products(${COLS}) VALUES(${v.map(()=>'?')})`).run(...v).lastInsertRowid;log('product_add',{id});r.json({id});});
 app.put('/api/admin/products/:id',admin,(q,r)=>{const v=parseP(q.body||{});db.prepare(`UPDATE products SET ${COLS.split(',').map(c=>c+'=?')} WHERE id=?`).run(...v,+q.params.id|0);log('product_edit',{id:q.params.id});r.json({ok:true});});
 app.delete('/api/admin/products/:id',admin,(q,r)=>{db.prepare('DELETE FROM products WHERE id=?').run(+q.params.id|0);log('product_del',{id:q.params.id});r.json({ok:true});});
-const sig=b=>b[0]===0xFF&&b[1]===0xD8?'jpg':b.subarray(1,4).toString()==='PNG'?'png':(b.subarray(0,4).toString()==='RIFF'&&b.subarray(8,12).toString()==='WEBP')?'webp':null;
+const sig=b=>b[0]===0xFF&&b[1]===0xD8?'jpg':b.subarray(1,4).toString()==='PNG'?'png':b.subarray(0,3).toString()==='GIF'?'gif':(b.subarray(0,4).toString()==='RIFF'&&b.subarray(8,12).toString()==='WEBP')?'webp':b.subarray(4,12).toString()==='ftypavif'?'avif':null;
 const up=multer({storage:multer.memoryStorage(),limits:{fileSize:8*1024*1024,files:10}});
 app.post('/api/admin/upload',admin,up.array('files',10),(q,r)=>{ // A04/A08: magic-byte check, random names
  const out=(q.files||[]).map(f=>{const x=sig(f.buffer);if(!x)throw new E('bad_image');const n=crypto.randomBytes(16).toString('hex')+'.'+x;fs.writeFileSync(path.join(__dirname,'uploads',n),f.buffer);return'/uploads/'+n;});r.json({files:out});});
