@@ -26,7 +26,7 @@ function renderProducts() {
       <div class="product-info">
         <h3>${p.name}</h3>
         <p>${p.price}€</p>
-        <button onclick="addToCart(${p.id})" style="margin-top:8px; padding:6px 12px; background:#111; color:#fff; border:0;">Add to Cart</button>
+        <button onclick="addToCart(${p.id})" style="margin-top:8px; padding:6px 12px; background:#111; color:#fff; border:0; cursor:pointer;">Add to Cart</button>
       </div>
     </article>
   `).join('');
@@ -47,8 +47,15 @@ function addToCart(id) {
 
 function renderCart() {
   const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
   document.getElementById('cartCount').textContent = count;
   const cartItems = document.getElementById('cartItems');
+  const cartTotal = document.getElementById('cart-total');
+
+  if (cartTotal) {
+    cartTotal.textContent = `${total}€`;
+  }
 
   if (!cart.length) {
     cartItems.innerHTML = '<p style="padding:20px; text-align:center;">Your cart is empty.</p>';
@@ -56,7 +63,7 @@ function renderCart() {
   }
 
   cartItems.innerHTML = cart.map(item => `
-    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:0 10px;">
       <div>
         <h4>${item.name}</h4>
         <p>${item.quantity} x ${item.price}€</p>
@@ -75,15 +82,11 @@ function closeCart() {
   document.getElementById('cartDrawer').classList.remove('open');
   document.getElementById('drawerOverlay').classList.remove('open');
 }
-  <!-- داخل نافذة السلة YOUR CART -->
-<div class="cart-footer">
-  <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;" />
-  <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-bottom: 15px;">
-    <span>المجموع الكلي:</span>
-    <span id="cart-total">110€</span>
-  </div>
 
-  <button onclick="showCheckoutModal()" style="width: 100%; padding: 14px; background: #000; color: #fff; border: none; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer;">
-    المتابعة لإتمام الطلب (Checkout)
-  </button>
-</div>
+function showCheckoutModal() {
+  if (!cart.length) {
+    alert('سلتك فارغة!');
+    return;
+  }
+  alert('سيتم توجيهك الآن لإتمام الدفع وإدخال معلومات الشحن.');
+}

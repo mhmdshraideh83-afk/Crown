@@ -58,7 +58,18 @@
       <button class="close-button" id="cartCloseButton">×</button>
     </div>
     <div id="cartItems"></div>
-    <div id="cartFooter"></div>
+    
+    <!-- قسم المجموع وزر الدفع داخل السلة -->
+    <div class="cart-footer" style="padding: 15px; border-top: 1px solid #eee; margin-top: auto;">
+      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-bottom: 15px;">
+        <span>المجموع الكلي:</span>
+        <span id="cart-total">0€</span>
+      </div>
+
+      <button onclick="showCheckoutModal()" style="width: 100%; padding: 14px; background: #000; color: #fff; border: none; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer;">
+        المتابعة لإتمام الطلب (Checkout)
+      </button>
+    </div>
   </aside>
 
   <script src="common.js"></script>
