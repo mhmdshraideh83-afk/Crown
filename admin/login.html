@@ -1,3 +1,22 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Admin</title><link rel="stylesheet" href="/style.css"></head>
-<body><div class="center glass"><h2 data-i="login"></h2><label data-i="email"></label><input id="e" type="email" autocomplete="username"><label data-i="password"></label><input id="p" type="password" autocomplete="current-password"><p id="m" class="msg"></p><button id="go" data-i="signin"></button> <span id="lb"></span></div>
-<script src="/common.js"></script><script src="/admin-portal-login.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Portal Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f1f1ef; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .login-card { background: white; padding: 40px; border: 1px solid #ddddda; width: 320px; }
+    input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
+    button { width: 100%; padding: 12px; background: #111; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h2>Admin Login</h2>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="loginBtn">LOG IN</button>
+  </div>
+  <script src="login.js"></script>
+</body>
+</html>

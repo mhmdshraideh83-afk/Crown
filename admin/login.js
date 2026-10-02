@@ -1,3 +1,18 @@
-applyLang();document.getElementById('lb').append(langBtn());
-const go=async()=>{try{await api('/api/admin/login',{method:'POST',body:{email:e.value,password:p.value}});location.href='/admin-portal';}catch{m.textContent=t('bad');}};
-document.getElementById('go').onclick=go;p.addEventListener('keydown',x=>{if(x.key==='Enter')go();});
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  const res = await fetch('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem('adminToken', data.token);
+    window.location.href = '/admin/panel.html';
+  } else {
+    alert(data.error || 'Login failed');
+  }
+});

@@ -1,3 +1,31 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Admin</title><link rel="stylesheet" href="/style.css"></head>
-<body><header class="glass"><h1>Admin</h1><span id="lb"></span><button id="lo" class="ghost" data-i="logout"></button></header><main id="app"></main>
-<script src="/common.js"></script><script src="/admin-portal/panel.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Control Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; }
+    .form-group { margin-bottom: 15px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; }
+    button { padding: 12px 24px; background: #111; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Admin Control Panel</h1>
+  <hr style="margin:20px 0;" />
+
+  <h3>Add New Product</h3>
+  <form id="productForm" style="max-width: 500px;">
+    <div class="form-group"><input type="text" id="name" placeholder="Product Title" required></div>
+    <div class="form-group"><input type="number" id="price" placeholder="Selling Price ($)" required></div>
+    <div class="form-group"><input type="number" id="costPrice" placeholder="AliExpress Cost Price ($)" required></div>
+    <div class="form-group"><input type="text" id="category" placeholder="Category (tops/bottoms/hoodies)" required></div>
+    <div class="form-group"><input type="text" id="aliExpressUrl" placeholder="AliExpress Product URL" required></div>
+    <div class="form-group"><input type="text" id="supplierId" placeholder="AliExpress Supplier ID" required></div>
+    <div class="form-group"><input type="text" id="imageUrl" placeholder="Image URL" required></div>
+    <button type="submit">Add Product</button>
+  </form>
+
+  <script src="panel.js"></script>
+</body>
+</html>

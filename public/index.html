@@ -1,3 +1,67 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Store</title><link rel="stylesheet" href="/style.css"></head>
-<body><header class="glass"><h1 data-i="store"></h1><span id="lb"></span><button id="cb"></button></header><main id="app"></main><div id="ov"></div>
-<script src="/common.js"></script><script src="/app.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BASICS Fashion Store</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero" id="home">
+    <div class="navbar">
+      <div class="nav-left">
+        <button class="icon-button" id="menuButton">☰</button>
+      </div>
+      <div class="brand">BASICS</div>
+      <div class="nav-right">
+        <button class="icon-button cart-button" id="cartButton">
+          🛒 <span class="cart-count" id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+    <div class="hero-content">
+      <h1>NEW BASICS</h1>
+      <button class="primary-button" id="shopNowButton">SHOP NOW</button>
+    </div>
+  </header>
+
+  <main class="shop-section" id="shop">
+    <div class="section-top">
+      <h2>COLLECTION</h2>
+      <div class="controls">
+        <input id="searchInput" type="search" placeholder="Search products..." />
+        <select id="sortSelect">
+          <option value="default">Sort by</option>
+          <option value="low">Price: Low to high</option>
+          <option value="high">Price: High to low</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="category-filter">
+      <button class="filter-button active" data-category="all">All</button>
+      <button class="filter-button" data-category="tops">Tops</button>
+      <button class="filter-button" data-category="bottoms">Bottoms</button>
+      <button class="filter-button" data-category="hoodies">Hoodies</button>
+    </div>
+
+    <div class="products-grid" id="productsGrid"></div>
+  </main>
+
+  <footer>© 2026 BASICS STORE</footer>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="drawer-title">
+      <h2>YOUR CART</h2>
+      <button class="close-button" id="cartCloseButton">×</button>
+    </div>
+    <div id="cartItems"></div>
+    <div id="cartFooter"></div>
+  </aside>
+
+  <script src="common.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

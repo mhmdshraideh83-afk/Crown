@@ -1,33 +1,32 @@
-let view='products';const root=document.getElementById('app'),SZ=['XS','S','M','L','XL','XXL','3XL'];
-const tabs=()=>h('div',{class:'tabs'},['products','orders','settings'].map(k=>h('button',{class:view===k?'':'ghost',onclick:()=>{view=k;show();}},t(k))));
-async function show(){root.replaceChildren(tabs());try{root.append(await({products:pList,orders:pOrders,settings:pSet})[view]());}catch{location.href='/admin-portal-login';}}
-async function pList(){const ps=await api('/api/admin/products');return h('div',{},h('button',{onclick:()=>{root.replaceChildren(tabs(),form());}},'+ '+t('newp')),
- h('div',{class:'glass',style:{padding:'12px',marginTop:'12px',overflowX:'auto'}},h('table',{},ps.map(p=>h('tr',{},h('td',{},h('img',{src:p.images[0]||'',alt:'',style:{width:'44px',height:'44px',borderRadius:'8px',objectFit:'cover'}})),h('td',{},p.title_en+' / '+p.title_ar),h('td',{},money(p.price)+' ('+money(p.cost)+')'),
-  h('td',{},h('button',{class:'ghost',onclick:()=>{root.replaceChildren(tabs(),form(p));}},t('edit')),' ',h('button',{class:'danger',onclick:async()=>{if(confirm(t('confirm'))){await api('/api/admin/products/'+p.id,{method:'DELETE'});show();}}},t('del'))))))));}
-function form(p){p=p||{title_en:'',title_ar:'',desc_en:'',desc_ar:'',tags:[],images:[],sizes:[],colors:[],price:'',compare:'',cost:'',ali_url:'',supplier_id:'',active:true};
- let imgs=[...p.images],cols=p.colors.map(c=>({...c}));const f={},msg=h('p',{class:'msg'}),ib=h('div',{class:'thumbs'}),cb=h('div',{class:'row'});
- const inp=(k,l,v,ty='text')=>{f[k]=h('input',{type:ty,value:v??'',maxlength:300,step:ty==='number'?'0.01':null});return h('label',{},t(l),f[k]);};
- const ta=(k,l,v)=>{f[k]=h('textarea',{rows:3,maxlength:5000});f[k].value=v||'';return h('label',{},t(l),f[k]);};
- const ri=()=>ib.replaceChildren(...imgs.map((s,i)=>h('img',{src:s,alt:'',title:t('remove'),onclick:()=>{imgs.splice(i,1);ri();}}))),rc=()=>cb.replaceChildren(...cols.map((c,i)=>h('button',{class:'ghost',onclick:()=>{cols.splice(i,1);rc();}},h('span',{class:'sw',style:{background:c.hex,display:'inline-block',verticalAlign:'middle'}}),' '+c.name+' ✕')));
- ri();rc();const chk=SZ.map(s=>h('input',{type:'checkbox',value:s,checked:p.sizes.includes(s)?'':null})),cn=h('input',{maxlength:30,placeholder:t('cname')}),cp=h('input',{type:'color',value:'#38bdf8'});
- const um=h('p',{class:'msg'});
- const fu=h('input',{type:'file',multiple:'',accept:'image/*',onchange:async()=>{um.className='msg';um.textContent='';const d=new FormData();[...fu.files].forEach(x=>d.append('files',x));
-  try{imgs.push(...(await api('/api/admin/upload',{method:'POST',body:d})).files);ri();um.className='ok';um.textContent='✓';}
-  catch(e){um.textContent=({bad_image:lang==='ar'?'نوع الصورة غير مدعوم. استخدم JPG أو PNG أو WEBP أو GIF أو AVIF':'Unsupported image type. Use JPG, PNG, WEBP, GIF or AVIF','File too large':lang==='ar'?'الصورة أكبر من 8 ميغابايت':'Image is larger than 8 MB'})[e.message]||t('err')+' ('+e.message+')';}fu.value='';}});
- const act=h('input',{type:'checkbox',checked:p.active?'':null});
- return h('div',{class:'glass',style:{padding:'20px',marginTop:'12px'}},h('div',{class:'two'},h('div',{},inp('title_en','titleEn',p.title_en),inp('title_ar','titleAr',p.title_ar),ta('desc_en','descEn',p.desc_en),ta('desc_ar','descAr',p.desc_ar),inp('tags','tags',p.tags.join(', '))),
-  h('div',{},inp('price','price',p.price,'number'),inp('compare','compare',p.compare||'','number'),inp('cost','cost',p.cost,'number'),inp('ali_url','ali',p.ali_url,'url'),inp('supplier_id','sup',p.supplier_id))),
-  h('label',{},t('images'),fu),um,ib,h('label',{},t('sizes')),h('div',{class:'row'},SZ.map((s,i)=>h('label',{},chk[i],' '+s))),h('label',{},t('colors')),cb,
-  h('div',{class:'row'},cp,cn,h('button',{class:'ghost',onclick:()=>{if(cn.value.trim()){cols.push({name:cn.value.trim(),hex:cp.value});cn.value='';rc();}}},t('addc'))),
-  h('label',{},act,' '+t('active')),msg,h('button',{onclick:async()=>{const b={title_en:f.title_en.value,title_ar:f.title_ar.value,desc_en:f.desc_en.value,desc_ar:f.desc_ar.value,tags:f.tags.value.split(',').map(x=>x.trim()).filter(Boolean),price:f.price.value,compare:f.compare.value,cost:f.cost.value,ali_url:f.ali_url.value,supplier_id:f.supplier_id.value,images:imgs,sizes:chk.filter(c=>c.checked).map(c=>c.value),colors:cols,active:act.checked};
-   try{await api('/api/admin/products'+(p.id?'/'+p.id:''),{method:p.id?'PUT':'POST',body:b});show();}catch(e){msg.textContent=t('err')+' ('+e.message+')';}}},t('save')));}
-async function pOrders(){const o=await api('/api/admin/orders');return h('div',{class:'glass',style:{padding:'12px',overflowX:'auto'}},h('table',{},h('tr',{},['#',t('name'),t('total'),t('profit'),t('status'),t('fulfil'),t('payout')].map(x=>h('th',{},x))),o.map(r=>h('tr',{},[r.ref,r.customer.name,money(r.total),money(r.profit),r.status,r.fulfillment,r.payout].map(x=>h('td',{},x))))));}
-async function pSet(){const s=await api('/api/admin/settings'),f={},msg=h('p',{class:'msg'});
- const i=(g,k,l,v,ty='text')=>{f[g+k]=h('input',{type:ty,value:v||'',maxlength:300,autocomplete:'off'});return h('label',{},t(l),f[g+k]);};
- const sel=(g,l,v,opts)=>{f[g+'provider']=h('select',{},opts.map(o=>h('option',{value:o,selected:o===v?'':null},o)));return h('label',{},t(l),f[g+'provider']);};
- return h('div',{class:'glass',style:{padding:'20px'}},h('h3',{},t('pay')),i('payout','holder','holder',s.payout.holder),i('payout','bank','bank',s.payout.bank),i('payout','iban','iban',s.payout.iban),i('payout','last4','last4',s.payout.last4),
-  h('h3',{},t('gw')),sel('gateway','prov',s.gateway.provider,['stripe','tap']),i('gateway','key','key',s.gateway.key),i('gateway','secret','secret',s.gateway.secret,'password'),
-  h('h3',{},t('auto')),sel('automation','prov',s.automation.provider,['dsers','aliexpress']),i('automation','key','key',s.automation.key),i('automation','sender_name','sender',s.automation.sender_name),h('small',{},t('keepHint')),msg,h('p',{},h('button',{onclick:async()=>{const g=k=>Object.fromEntries(Object.entries(f).filter(([n])=>n.startsWith(k)).map(([n,v])=>[n.slice(k.length),v.value]));
-   try{await api('/api/admin/settings',{method:'PUT',body:{payout:g('payout'),gateway:g('gateway'),automation:g('automation')}});msg.className='ok';msg.textContent=t('saved');}catch(e){msg.className='msg';msg.textContent=t('err')+' ('+e.message+')';}}},t('save'))));}
-document.getElementById('lo').onclick=async()=>{await api('/api/admin/logout',{method:'POST'});location.href='/admin-portal-login';};
-applyLang();document.getElementById('lb').append(langBtn(show));show();
+const token = localStorage.getItem('adminToken');
+if (!token) window.location.href = '/admin/login.html';
+
+document.getElementById('productForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const body = {
+    name: document.getElementById('name').value,
+    price: document.getElementById('price').value,
+    costPrice: document.getElementById('costPrice').value,
+    category: document.getElementById('category').value,
+    aliExpressUrl: document.getElementById('aliExpressUrl').value,
+    supplierId: document.getElementById('supplierId').value,
+    imageUrl: document.getElementById('imageUrl').value
+  };
+
+  const res = await fetch('/api/products', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (res.ok) {
+    alert('Product added successfully!');
+    location.reload();
+  } else {
+    alert('Failed to add product');
+  }
+});

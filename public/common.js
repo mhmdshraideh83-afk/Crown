@@ -1,11 +1,14 @@
-const T={en:{store:'My Store',empty:'No products yet. Please check back soon.',add:'Add to cart',size:'Size',color:'Color',cart:'Cart',checkout:'Place order',name:'Full name',email:'Email',phone:'Phone',address:'Address',city:'City',country:'Country',zip:'ZIP',total:'Total',cartEmpty:'Your cart is empty',done:'Order received! Reference:',close:'Close',remove:'Remove',err:'Something went wrong. Check your data.',pick:'Please choose size/color',
- login:'Admin sign in',password:'Password',signin:'Sign in',bad:'Invalid credentials',logout:'Log out',products:'Products',orders:'Orders',settings:'Payment & Payout Settings',newp:'New product',edit:'Edit',del:'Delete',save:'Save',saved:'Saved',titleEn:'Title (EN)',titleAr:'Title (AR)',descEn:'Description (EN)',descAr:'Description (AR)',tags:'Tags (comma separated)',price:'Price ($)',compare:'Compare price ($)',cost:'Supplier cost ($)',ali:'AliExpress product URL',sup:'Supplier ID',images:'Images (multiple)',sizes:'Available sizes',colors:'Colors',cname:'Color name',addc:'Add color',active:'Visible in store',confirm:'Delete this product?',profit:'Profit',status:'Status',fulfil:'Fulfillment',payout:'Payout',holder:'Card holder',bank:'Bank name',iban:'IBAN',last4:'Card last 4 digits (never the full number)',prov:'Provider',key:'API key',secret:'Secret key',sender:'Sender name on parcel',gw:'Payment gateway',auto:'Automation (DSers / AliExpress)',pay:'Receiving bank account',keepHint:'Leave masked value to keep existing'},
-ar:{store:'متجري',empty:'لا توجد منتجات حالياً. تابعنا قريباً.',add:'أضف للسلة',size:'المقاس',color:'اللون',cart:'السلة',checkout:'إتمام الطلب',name:'الاسم الكامل',email:'البريد الإلكتروني',phone:'الهاتف',address:'العنوان',city:'المدينة',country:'الدولة',zip:'الرمز البريدي',total:'المجموع',cartEmpty:'السلة فارغة',done:'تم استلام الطلب! رقم المرجع:',close:'إغلاق',remove:'حذف',err:'حدث خطأ. تحقق من البيانات.',pick:'الرجاء اختيار المقاس/اللون',
- login:'دخول المدير',password:'كلمة المرور',signin:'دخول',bad:'بيانات غير صحيحة',logout:'تسجيل الخروج',products:'المنتجات',orders:'الطلبات',settings:'إعدادات الدفع والأرباح',newp:'منتج جديد',edit:'تعديل',del:'حذف',save:'حفظ',saved:'تم الحفظ',titleEn:'العنوان (إنجليزي)',titleAr:'العنوان (عربي)',descEn:'الوصف (إنجليزي)',descAr:'الوصف (عربي)',tags:'الوسوم (مفصولة بفاصلة)',price:'السعر ($)',compare:'السعر قبل الخصم ($)',cost:'تكلفة المورد ($)',ali:'رابط المنتج في AliExpress',sup:'معرّف المورد',images:'الصور (متعددة)',sizes:'المقاسات المتاحة',colors:'الألوان',cname:'اسم اللون',addc:'أضف لوناً',active:'ظاهر في المتجر',confirm:'حذف هذا المنتج؟',profit:'الربح',status:'الحالة',fulfil:'التنفيذ',payout:'التحويل',holder:'اسم صاحب البطاقة',bank:'اسم البنك',iban:'رقم الآيبان IBAN',last4:'آخر 4 أرقام من البطاقة (وليس الرقم كاملاً)',prov:'المزوّد',key:'مفتاح API',secret:'المفتاح السري',sender:'اسم المرسل على الشحنة',gw:'بوابة الدفع',auto:'الأتمتة (DSers / AliExpress)',pay:'الحساب البنكي المستلم',keepHint:'اترك القيمة المخفية للإبقاء على الحالية'}};
-let lang=localStorage.getItem('lang')||'ar';
-const t=k=>T[lang][k]||k;
-const h=(tag,p={},...k)=>{const e=document.createElement(tag);for(const[a,v]of Object.entries(p)){if(a==='class')e.className=v;else if(a.startsWith('on'))e.addEventListener(a.slice(2),v);else if(a==='style')Object.assign(e.style,v);else if(v!==false&&v!=null)e.setAttribute(a,v);}e.append(...k.flat().filter(x=>x!=null));return e;};
-function applyLang(){document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));}
-function langBtn(cb){return h('button',{class:'ghost',onclick:()=>{lang=lang==='ar'?'en':'ar';localStorage.setItem('lang',lang);applyLang();cb&&cb();}},'EN / عربي');}
-async function api(u,o={}){const fd=o.body instanceof FormData;const r=await fetch(u,{credentials:'same-origin',...o,body:o.body&&!fd?JSON.stringify(o.body):o.body,headers:{'X-Requested-With':'fetch',...(o.body&&!fd?{'Content-Type':'application/json'}:{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'error');return d;}
-const money=n=>'$'+Number(n).toFixed(2);
+const API_BASE = '';
+
+async function fetchProducts() {
+  const res = await fetch(`${API_BASE}/api/products`);
+  return res.json();
+}
+
+function getCart() {
+  return JSON.parse(localStorage.getItem('basicsCart')) || [];
+}
+
+function saveCart(cart) {
+  localStorage.setItem('basicsCart', JSON.stringify(cart));
+}
