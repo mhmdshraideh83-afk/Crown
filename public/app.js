@@ -75,3 +75,15 @@ function closeCart() {
   document.getElementById('cartDrawer').classList.remove('open');
   document.getElementById('drawerOverlay').classList.remove('open');
 }
+  <!-- داخل نافذة السلة YOUR CART -->
+<div class="cart-footer">
+  <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;" />
+  <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin-bottom: 15px;">
+    <span>المجموع الكلي:</span>
+    <span id="cart-total">110€</span>
+  </div>
+
+  <button onclick="showCheckoutModal()" style="width: 100%; padding: 14px; background: #000; color: #fff; border: none; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer;">
+    المتابعة لإتمام الطلب (Checkout)
+  </button>
+</div>
