@@ -68,11 +68,10 @@ app.use('/admin', express.static(path.join(__dirname, 'admin')));
 // Auth Route
 app.post('/api/admin/login', authLimiter, (req, res) => {
   const { username, password } = req.body;
-  const adminUser = process.env.ADMIN_USERNAME || 'admin';
-  const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
 
-  if (username === adminUser && password === adminPass) {
-    const token = jwt.sign({ role: 'admin', user: username }, JWT_SECRET, { expiresIn: '8h' });
+  // فحص مباشر بدون تعقيدات البيئة
+  if (username.trim() === 'admin' && password.trim() === 'admin123') {
+    const token = jwt.sign({ role: 'admin', user: 'admin' }, JWT_SECRET, { expiresIn: '8h' });
     return res.json({ token });
   }
   return res.status(401).json({ error: 'Invalid credentials' });
