@@ -1,30 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Control Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم - BASICS</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 40px; }
+    :root {
+      --primary: #0091ff;
+      --bg: #eaf5ff;
+      --dark: #111;
+      --card-bg: #ffffff;
+      --border: #d0e4ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--dark); padding: 20px; }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    /* Navigation Buttons */
+    .top-nav {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-start;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 12px 28px;
+      border-radius: 20px;
+      border: none;
+      font-size: 18px;
+      font-weight: bold;
+      background: #ffffff;
+      color: #333;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      transition: 0.2s;
+    }
+
+    .nav-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-add-product {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 25px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      display: inline-block;
+    }
+
+    /* Tab Content Cards */
+    .tab-content { display: none; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .tab-content.active { display: block; }
+
     .form-group { margin-bottom: 15px; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; }
-    button { padding: 12px 24px; background: #111; color: white; border: none; cursor: pointer; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; }
+
+    /* Table for Orders */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: right; }
+    th { background: #f7fbff; }
+
+    .badge { padding: 4px 8px; border-radius: 5px; font-size: 12px; background: #e1f5fe; color: #0288d1; }
   </style>
 </head>
 <body>
-  <h1>Admin Control Panel</h1>
-  <hr style="margin:20px 0;" />
 
-  <h3>Add New Product</h3>
-  <form id="productForm" style="max-width: 500px;">
-    <div class="form-group"><input type="text" id="name" placeholder="Product Title" required></div>
-    <div class="form-group"><input type="number" id="price" placeholder="Selling Price ($)" required></div>
-    <div class="form-group"><input type="number" id="costPrice" placeholder="AliExpress Cost Price ($)" required></div>
-    <div class="form-group"><input type="text" id="category" placeholder="Category (tops/bottoms/hoodies)" required></div>
-    <div class="form-group"><input type="text" id="aliExpressUrl" placeholder="AliExpress Product URL" required></div>
-    <div class="form-group"><input type="text" id="supplierId" placeholder="AliExpress Supplier ID" required></div>
-    <div class="form-group"><input type="text" id="imageUrl" placeholder="Image URL" required></div>
-    <button type="submit">Add Product</button>
-  </form>
+  <div class="container">
+    
+    <!-- Top Tabs Matching Your Image -->
+    <div class="top-nav">
+      <button class="nav-btn active" onclick="switchTab('products')">المنتجات</button>
+      <button class="nav-btn" onclick="switchTab('orders')">الطلبات</button>
+      <button class="nav-btn" onclick="switchTab('payouts')">إعدادات الدفع والأرباح</button>
+    </div>
+
+    <!-- 1. TAB: PRODUCTS -->
+    <div id="tab-products" class="tab-content active">
+      <h2>إدارة المنتجات</h2>
+      <button class="btn-add-product" onclick="toggleProductForm()">+ منتج جديد</button>
+
+      <!-- Add Product Form (Hidden by default) -->
+      <form id="productForm" style="display:none; margin-top:20px; border-top:2px solid #eee; padding-top:20px;">
+        <h3>إضافة منتج جديد</h3>
+        <div class="form-group"><label>اسم المنتج:</label><input type="text" id="p_name" required></div>
+        <div class="form-group"><label>سعر البيع ($):</label><input type="number" id="p_price" required></div>
+        <div class="form-group"><label>سعر التكلفة علي علي إكسبريس ($):</label><input type="number" id="p_cost" required></div>
+        <div class="form-group"><label>القسم:</label>
+          <select id="p_category">
+            <option value="tops">Tops</option>
+            <option value="bottoms">Bottoms</option>
+            <option value="hoodies">Hoodies</option>
+          </select>
+        </div>
+        <div class="form-group"><label>رابط المنتج على AliExpress:</label><input type="url" id="p_ali_url" required></div>
+        <div class="form-group"><label>معرف المورد (Supplier ID):</label><input type="text" id="p_supplier" required></div>
+        <div class="form-group"><label>رابط صورة المنتج:</label><input type="url" id="p_img" required></div>
+        <button type="submit" class="btn-add-product" style="border-radius:8px;">حفظ المنتج</button>
+      </form>
+
+      <div id="productsList" style="margin-top:25px;"></div>
+    </div>
+
+    <!-- 2. TAB: ORDERS -->
+    <div id="tab-orders" class="tab-content">
+      <h2>سجل الطلبات والمشترين</h2>
+      <p style="margin-bottom:15px; color:#666;">إجمالي عدد الطلبات: <strong id="orderCount">0</strong></p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>اسم المشتري</th>
+            <th>رقم الهاتف / العنوان</th>
+            <th>المبلغ الكلي</th>
+            <th>الربح الصافي</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable">
+          <!-- Orders loaded via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3. TAB: PAYOUTS -->
+    <div id="tab-payouts" class="tab-content">
+      <h2>إعدادات استقبال الأرباح والفيزا</h2>
+      <p style="color:#666; margin-bottom:20px;">حدد البطاقة أو الفيزا التي سيتم تحويل الأرباح (Profit Margin) إليها تلقائياً فور الشراء.</p>
+
+      <form id="payoutForm">
+        <div class="form-group">
+          <label>رقم الفيزا / بطاقة البنك لحساب الأرباح:</label>
+          <input type="text" id="payoutCard" placeholder="4532 **** **** 8899" required>
+        </div>
+        <div class="form-group">
+          <label>اسم صاحب البطاقة:</label>
+          <input type="text" id="cardHolder" placeholder="Mohammad Shareeda" required>
+        </div>
+        <div class="form-group">
+          <label>Stripe / Tap API Secret Key:</label>
+          <input type="password" id="apiKey" placeholder="sk_live_****************" required>
+        </div>
+        <button type="submit" class="btn-add-product" style="border-radius:8px;">حفظ إعدادات الأرباح</button>
+      </form>
+    </div>
+
+  </div>
 
   <script src="panel.js"></script>
 </body>

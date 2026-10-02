@@ -138,4 +138,18 @@ app.post('/api/checkout', (req, res) => {
   res.json({ success: true, orderId: order.id });
 });
 
+// Get Orders (Admin Only)
+app.get('/api/admin/orders', authenticateToken, (req, res) => {
+  const data = getData();
+  res.json(data.orders || []);
+});
+
+// Save Payout Settings (Admin Only)
+app.post('/api/admin/payout-settings', authenticateToken, (req, res) => {
+  const data = getData();
+  data.settings = { ...data.settings, payoutCard: req.body.card, updatedAt: new Date() };
+  saveData(data);
+  res.json({ success: true });
+});
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
