@@ -1,131 +1,84 @@
-const token = localStorage.getItem('adminToken');
-if (!token) window.location.href = '/admin/login.html';
+const API_BASE = '/api/admin';
 
-function switchTab(tabName) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-
-  document.getElementById(`tab-${tabName}`).classList.add('active');
-  event.target.classList.add('active');
-
-  if (tabName === 'orders') loadOrders();
-  if (tabName === 'products') loadProducts();
-}
-
-function toggleProductForm() {
-  const form = document.getElementById('productForm');
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-// Load & Display Products
-async function loadProducts() {
-  const res = await fetch('/api/products');
-  const products = await res.json();
-  const container = document.getElementById('productsList');
-  
-  if(!products.length) {
-    container.innerHTML = '<p>لا يوجد منتجات حالياً.</p>';
+document.addEventListener('DOMContentLoaded', () => {
+  if (!localStorage.getItem('admin_token')) {
+    window.location.href = '/admin-portal-login';
     return;
   }
-
-  container.innerHTML = products.map(p => `
-    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <img src="${p.images[0]}" width="50" height="50" style="object-fit:cover; border-radius:5px;" />
-        <div>
-          <strong>${p.name}</strong><br/>
-          <small>سعر البيع: $${p.price} | التكلفة: $${p.costPrice}</small>
-        </div>
-      </div>
-      <button onclick="deleteProduct(${p.id})" style="background:#ff4d4d; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer;">حذف</button>
-    </div>
-  `).join('');
-}
-
-// Delete Product
-async function deleteProduct(id) {
-  if(!confirm('هل أنت تأكد من حذف المنتج؟')) return;
-  await fetch(`/api/products/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
   loadProducts();
-}
-
-// Submit Product
-document.getElementById('productForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const body = {
-    name: document.getElementById('p_name').value,
-    price: document.getElementById('p_price').value,
-    costPrice: document.getElementById('p_cost').value,
-    category: document.getElementById('p_category').value,
-    aliExpressUrl: document.getElementById('p_ali_url').value,
-    supplierId: document.getElementById('p_supplier').value,
-    imageUrl: document.getElementById('p_img').value
-  };
-
-  const res = await fetch('/api/products', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    alert('تم إضافة المنتج بنجاح!');
-    toggleProductForm();
-    loadProducts();
-  }
 });
 
-// Load Orders
-async function loadOrders() {
-  const res = await fetch('/api/admin/orders', {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  const orders = await res.json();
-  
-  document.getElementById('orderCount').textContent = orders.length;
-  const tbody = document.getElementById('ordersTable');
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('productsView').style.display = 'none';
+  document.getElementById('ordersView').style.display = 'none';
+  document.getElementById('settingsView').style.display = 'none';
 
-  if(!orders.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">لا يوجد طلبات حتى الآن.</td></tr>';
-    return;
+  if (tab === 'products') {
+    document.getElementById('productsView').style.display = 'block';
+    loadProducts();
+  } else if (tab === 'orders') {
+    document.getElementById('ordersView').style.display = 'block';
+    loadOrders();
+  } else if (tab === 'settings') {
+    document.getElementById('settingsView').style.display = 'block';
   }
+}
 
-  tbody.innerHTML = orders.map(o => `
+async function authFetch(url, options = {}) {
+  const token = localStorage.getItem('admin_token');
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      ...options.headers
+    }
+  });
+  if (res.status === 401 || res.status === 403) {
+    logout();
+    throw new Error('Unauthenticated');
+  }
+  return res.json();
+}
+
+async function loadProducts() {
+  const products = await authFetch(`${API_BASE}/products`);
+  const tbody = document.getElementById('productsTable');
+  tbody.innerHTML = products.map(p => `
     <tr>
-      <td>#${o.id}</td>
-      <td>${o.customer.name}</td>
-      <td>${o.customer.phone || 'N/A'}<br/><small>${o.customer.address || ''}</small></td>
-      <td>$${o.total}</td>
-      <td style="color:green; font-weight:bold;">+$${o.profit}</td>
-      <td><span class="badge">${o.status}</span></td>
+      <td><img src="${p.images?.[0] || ''}" width="40" height="40"></td>
+      <td>${p.title}</td>
+      <td>€${p.price}</td>
+      <td>€${p.costPrice}</td>
+      <td>€${(p.price - p.costPrice).toFixed(2)}</td>
+      <td><button onclick="deleteProduct('${p._id}')">حذف</button></td>
     </tr>
   `).join('');
 }
 
-// Save Payout Settings
-document.getElementById('payoutForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const card = document.getElementById('payoutCard').value;
-  
-  const res = await fetch('/api/admin/payout-settings', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ card })
-  });
+async function loadOrders() {
+  const orders = await authFetch(`${API_BASE}/orders`);
+  const tbody = document.getElementById('ordersTable');
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td>${o.orderNumber}</td>
+      <td>${o.customer?.name || ''}</td>
+      <td>€${o.subtotal}</td>
+      <td>${o.paymentStatus}</td>
+      <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+    </tr>
+  `).join('');
+}
 
-  if(res.ok) {
-    alert('تم حفظ إعدادات بطاقة الأرباح بنجاح!');
+async function deleteProduct(id) {
+  if (confirm('هل أنت تأكد من حذف هذا المنتج؟')) {
+    await authFetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+    loadProducts();
   }
-});
+}
 
-// Initial Load
-loadProducts();
+function logout() {
+  localStorage.removeItem('admin_token');
+  window.location.href = '/admin-portal-login';
+}

@@ -1,18 +1,21 @@
-document.getElementById('loginBtn').addEventListener('click', async () => {
-  const username = document.getElementById('username').value;
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
-  const res = await fetch('/api/admin/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, password })
-  });
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
 
-  const data = await res.json();
-  if (res.ok) {
-    localStorage.setItem('adminToken', data.token);
-    window.location.href = '/admin/panel.html';
-  } else {
-    alert(data.error || 'Login failed');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    localStorage.setItem('admin_token', data.token);
+    window.location.href = '/admin-portal';
+  } catch (err) {
+    alert(err.message);
   }
-});
+}
